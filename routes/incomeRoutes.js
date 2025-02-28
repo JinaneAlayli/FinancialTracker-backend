@@ -1,10 +1,10 @@
-const express = require('express');
-const { getIncomes, createIncome, deleteIncome } = require('../controllers/incomeController');
-const { verifyToken } = require('../middleware/authMiddleware');
+import express from 'express';
+import { getIncomes, createIncome } from '../controllers/incomeController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
 
 router.get('/', verifyToken, getIncomes);
 router.post('/', verifyToken, createIncome);
-router.delete('/:id', verifyToken, deleteIncome);
+export default router;
 
-module.exports = router;
