@@ -4,40 +4,33 @@ import supabase from '../config/supabaseClient.js';
  
 export const signup = async (req, res) => {
     const { name, email, password } = req.body;
- 
+    const { data: existingUser, error } = await supabase.from('admin').select('email').eq('email', email).single();
+    if (existingUser) {
+        return res.status(400).json({ error: 'Email already in use' });
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const { data, error } = await supabase.from('admin').insert([
+    const { data, error: insertError } = await supabase.from('admin').insert([
         { name, email, password: hashedPassword, role: 'admin' }
     ]);
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (insertError) return res.status(500).json({ error: insertError.message });
     res.json({ message: 'Admin registered successfully' });
 };
  
 export const login = async (req, res) => {
-    const { email, password } = req.body;
-    console.log(" Received Login Request:", { email, password });
-
-    const { data: user, error } = await supabase.from('admin').select('id, name, email, password, role').eq('email', email).single();
-
-    if (error || !user) {
-        console.log(" User not found or Supabase error:", error);
-        return res.status(400).json({ error: 'Invalid Credentials' });
+    const { email, password } = req.body; 
+    const { data: user, error } = await supabase.from('admin').select('id, email, password, role').eq('email', email).single();
+    if (error || !user) { 
+        return res.status(400).json({ error: 'This user does not exist' });
     }
-
-    console.log("Found User:", user);
-    console.log("Hashed Password from DB:", user.password);
-
     const validPass = await bcrypt.compare(password, user.password);
-    console.log("Password Match Result:", validPass);
-
     if (!validPass) {
-        
-        return res.status(400).json({ error: 'Invalid Credentials' });
+        return res.status(400).json({ error: 'Incorrect password' });
     }
- 
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
- 
     res.json({ token, role: user.role });
 };
