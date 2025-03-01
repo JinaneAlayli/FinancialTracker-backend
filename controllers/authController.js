@@ -31,6 +31,23 @@ export const login = async (req, res) => {
     if (!validPass) {
         return res.status(400).json({ error: 'Incorrect password' });
     }
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token, role: user.role });
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: "1h" });
+ 
+    res.cookie("token", token, {
+        httpOnly: true, 
+        secure: false,  
+        sameSite: "Strict",  
+        maxAge: 3600000, 
+    });
+
+    res.json({ message: "Login successful" });
+};
+ 
+export const logout = (req, res) => {
+    res.clearCookie("token");
+    res.json({ message: "Logged out successfully" });
+};
+ 
+export const getMe = (req, res) => {
+    res.json(req.user);
 };

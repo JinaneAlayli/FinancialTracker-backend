@@ -1,20 +1,30 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-
+import cookieParser from "cookie-parser";
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import incomeRoutes from './routes/incomeRoutes.js';
 import recurringIncomeRoutes from './routes/recurringIncomeRoutes.js';
 import recurringExpenseRoutes from './routes/recurringExpenseRoutes.js';
+
+import { verifyToken } from "./middleware/authMiddleware.js";
+import { getMe } from "./controllers/authController.js";
+
 dotenv.config();
 const app = express();
+app.use(cookieParser());
+
 const port = process.env.PORT;
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173", 
+    credentials: true 
+  }));
+
 app.use(express.json());
- 
+app.get("/users/me", verifyToken, getMe);
 app.use('/users', authRoutes);
 app.use('/admins', adminRoutes);
 app.use('/expenses', expenseRoutes);
