@@ -9,6 +9,7 @@ import incomeRoutes from './routes/incomeRoutes.js';
 import recurringIncomeRoutes from './routes/recurringIncomeRoutes.js';
 import recurringExpenseRoutes from './routes/recurringExpenseRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
+import reportsRoutes from "./routes/reportsRoutes.js";
 
 import { verifyToken } from "./middleware/authMiddleware.js";
 import { getMe } from "./controllers/authController.js";
@@ -33,6 +34,7 @@ app.use('/incomes', incomeRoutes);
 app.use('/recurring_income', recurringIncomeRoutes);
 app.use('/recurring_expense', recurringExpenseRoutes);
 app.use('/categories', categoryRoutes);
+app.use("/reports", reportsRoutes);
 
 app.listen(port, () => {
     console.log(` Server running on port ${port}`);
