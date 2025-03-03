@@ -34,7 +34,7 @@ app.use('/incomes', incomeRoutes);
 app.use('/recurring_income', recurringIncomeRoutes);
 app.use('/recurring_expense', recurringExpenseRoutes);
 app.use('/categories', categoryRoutes);
-app.use("/reports", reportsRoutes);
+app.use('/reports', reportsRoutes);
 
 app.listen(port, () => {
     console.log(` Server running on port ${port}`);

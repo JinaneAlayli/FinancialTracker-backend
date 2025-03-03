@@ -19,7 +19,7 @@ export const createCategory = async (req, res) => {
 
 //Delete a category
 export const deleteCategory = async (req, res) => {
-    const { id } = Number(req.params);
+    const { id } = req.params;
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     res.json({ message: 'Category deleted successfully' });
