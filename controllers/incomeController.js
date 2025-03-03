@@ -7,10 +7,12 @@ export const getIncomes = async (req, res) => {
 };
 
 export const createIncome = async (req, res) => {
-    const { title, description, amount, currency, category_id } = req.body;
+    const { title, description, amount, currency, date_time  ,category_id } = req.body; 
+    
     const { data, error } = await supabase.from('income').insert([
-        { title, description, amount, currency, category_id, admin_id: req.user.id }
+        { title, description, amount, currency,  date_time, category_id, admin_id: req.user.id }
     ]);
+    
     if (error) return res.status(500).json({ error: error.message });
     res.json({ message: 'Income added successfully' });
 };

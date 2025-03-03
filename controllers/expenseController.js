@@ -7,9 +7,9 @@ export const getExpenses = async (req, res) => {
 };
  
 export const createExpense = async (req, res) => {
-    const { title, description, amount, currency, category_id } = req.body;
+    const { title, description, amount, currency, category_id, date_time } = req.body;
     const { data, error } = await supabase.from('expense').insert([
-        { title, description, amount, currency, category_id, admin_id: req.user.id }
+        { title, description, amount, currency, category_id, date_time, admin_id: req.user.id }
     ]);
     if (error) return res.status(500).json({ error: error.message });
     res.json({ message: 'Expense added successfully' });
