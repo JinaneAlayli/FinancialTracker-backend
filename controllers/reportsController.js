@@ -3,7 +3,7 @@ import supabase from "../config/supabaseClient.js";
 // Generate report with optimized queries
 export const generateReport = async (req, res) => {
     try {
-        const admin_id = req.user.id;
+    
         const { filter, page = 1, pageSize = 50 } = req.query;
 
         // Validate filter
@@ -17,10 +17,10 @@ export const generateReport = async (req, res) => {
 
         // Fetch transactions from database
         const [income, expense, recurring_income, recurring_expense] = await Promise.all([
-            fetchTransactions("income", admin_id, formattedDate, page, pageSize),
-            fetchTransactions("expense", admin_id, formattedDate, page, pageSize),
-            fetchRecurringTransactions("recurring_income", admin_id),
-            fetchRecurringTransactions("recurring_expense", admin_id),
+            fetchTransactions("income", formattedDate, page, pageSize),
+            fetchTransactions("expense", formattedDate, page, pageSize),
+            fetchRecurringTransactions("recurring_income"),
+            fetchRecurringTransactions("recurring_expense"),
         ]);
 
         // Process recurring transactions
@@ -60,14 +60,13 @@ const getStartDate = (filter) => {
 };
 
 // 🔹 Function to fetch income/expense transactions with pagination
-const fetchTransactions = async (table, admin_id, startDate, page, pageSize) => {
+const fetchTransactions = async (table, startDate, page, pageSize) => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize - 1;
 
     const { data, error } = await supabase
         .from(table)
         .select("id, amount, date_time, category_id")
-        .eq("admin_id", admin_id)
         .gte("date_time", startDate)
         .range(start, end);
 
@@ -76,11 +75,10 @@ const fetchTransactions = async (table, admin_id, startDate, page, pageSize) => 
 };
 
 // 🔹 Function to fetch recurring income/expense transactions
-const fetchRecurringTransactions = async (table, admin_id) => {
+const fetchRecurringTransactions = async (table) => {
     const { data, error } = await supabase
         .from(table)
-        .select("id, amount, start_date, frequency, category_id")
-        .eq("admin_id", admin_id);
+        .select("id, amount, start_date, frequency, category_id");
 
     if (error) throw new Error(`Error fetching ${table}: ${error.message}`);
     return data || [];
