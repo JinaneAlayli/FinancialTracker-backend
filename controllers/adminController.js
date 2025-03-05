@@ -9,14 +9,32 @@ export const getAdmins = async (req, res) => {
 export const deleteAdmin = async (req, res) => {
     const { id } = req.params;
  
-    const { count: categoryCount } = await supabase.from('categories').select('*', { count: "exact" }).eq('admin_id', id);
-    const { count: incomeCount } = await supabase.from('income').select('*', { count: "exact" }).eq('admin_id', id);
-    const { count: expenseCount } = await supabase.from('expense').select('*', { count: "exact" }).eq('admin_id', id);
-    const { count: recurringIncomeCount } = await supabase.from('recurring_income').select('*', { count: "exact" }).eq('admin_id', id);
-    const { count: recurringExpenseCount } = await supabase.from('recurring_expense').select('*', { count: "exact" }).eq('admin_id', id);
+    const { count: activeIncomeCount } = await supabase
+        .from('income')
+        .select('*', { count: "exact" })
+        .eq('admin_id', id)
+        .eq('is_deleted', false);
 
-    if (categoryCount || incomeCount || expenseCount || recurringIncomeCount || recurringExpenseCount) {
-        return res.status(400).json({ error: "Cannot delete admin with linked data" });
+    const { count: activeRecurringIncomeCount } = await supabase
+        .from('recurring_income')
+        .select('*', { count: "exact" })
+        .eq('admin_id', id)
+        .eq('is_deleted', false);
+
+    const { count: activeExpenseCount } = await supabase
+        .from('expense')
+        .select('*', { count: "exact" })
+        .eq('admin_id', id)
+        .eq('is_deleted', false);
+
+    const { count: activeRecurringExpenseCount } = await supabase
+        .from('recurring_expense')
+        .select('*', { count: "exact" })
+        .eq('admin_id', id)
+        .eq('is_deleted', false);
+ 
+    if (activeIncomeCount || activeRecurringIncomeCount || activeExpenseCount || activeRecurringExpenseCount) {
+        return res.status(400).json({ error: "Cannot delete admin. Linked financial records are not soft deleted." });
     }
  
     const { error } = await supabase.from("admin").delete().eq("id", id);
