@@ -11,6 +11,7 @@ import recurringExpenseRoutes from './routes/recurringExpenseRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import reportsRoutes from "./routes/reportsRoutes.js";
 import profitGoalRoutes from "./routes/profitGoalRoutes.js";
+import totalRoutes from './routes/totalRoutes.js';
 
 import { verifyToken } from "./middleware/authMiddleware.js";
 import { getMe } from "./controllers/authController.js";
@@ -37,7 +38,7 @@ app.use('/recurring_expense', recurringExpenseRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/reports', reportsRoutes);
 app.use("/profitgoals", profitGoalRoutes);
-
+app.use('/totals', totalRoutes);
 
 app.listen(port, () => {
     console.log(` Server running on port ${port}`);
