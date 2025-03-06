@@ -1,53 +1,42 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import supabase from '../config/supabaseClient.js';
- 
-export const signup = async (req, res) => {
-    const { name, email, password } = req.body;
-    const { data: existingUser, error } = await supabase.from('admin').select('email').eq('email', email).single();
-    if (existingUser) {
-        return res.status(400).json({ error: 'Email already in use' });
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const { data, error: insertError } = await supabase.from('admin').insert([
-        { name, email, password: hashedPassword, role: 'admin' }
-    ]);
+import { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
-    if (insertError) return res.status(500).json({ error: insertError.message });
-    res.json({ message: 'Admin registered successfully' });
-};
- 
-export const login = async (req, res) => {
-    const { email, password } = req.body; 
-    const { data: user, error } = await supabase.from('admin').select('id, email, password, role').eq('email', email).single();
-    if (error || !user) { 
-        return res.status(400).json({ error: 'This user does not exist' });
-    }
-    const validPass = await bcrypt.compare(password, user.password);
-    if (!validPass) {
-        return res.status(400).json({ error: 'Incorrect password' });
-    }
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: "1h" });
- 
-    res.cookie("token", token, {
-        httpOnly: true, 
-        secure: false,  
-        sameSite: "Strict",  
-        maxAge: 3600000, 
-    });
+const AuthContext = createContext();
 
-    res.json({ message: "Login successful" });
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/users/me", { withCredentials: true })
+      .then((res) => {
+        setUser(res.data); // Store full user details
+      })
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const login = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/users/me", { withCredentials: true });
+      setUser(data);
+    } catch {
+      setUser(null);
+    }
+  }; 
+  const logout = async () => {
+    await axios.post("http://localhost:5000/users/logout", {}, { withCredentials: true });
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
- 
-export const logout = (req, res) => {
-    res.clearCookie("token");
-    res.json({ message: "Logged out successfully" });
-};
- 
-export const getMe = (req, res) => {
-    res.json(req.user);
-};
+
+export const useAuth = () => useContext(AuthContext);
