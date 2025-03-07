@@ -12,6 +12,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import reportsRoutes from "./routes/reportsRoutes.js";
 import profitGoalRoutes from "./routes/profitGoalRoutes.js";
 import totalRoutes from './routes/totalRoutes.js';
+import goalTotalsRoutes from "./routes/goalTotalsRoutes.js";
 
 import { verifyToken } from "./middleware/authMiddleware.js";
 import { getMe } from "./controllers/authController.js";
@@ -39,6 +40,8 @@ app.use('/categories', categoryRoutes);
 app.use('/reports', reportsRoutes);
 app.use("/profitgoals", profitGoalRoutes);
 app.use('/totals', totalRoutes);
+
+app.use("/goal-totals", goalTotalsRoutes);
 
 app.listen(port, () => {
     console.log(` Server running on port ${port}`);
