@@ -22,11 +22,16 @@ const app = express();
 app.use(cookieParser());
 
 const port = process.env.PORT;
-
-app.use(cors({
-    origin: "http://localhost:5173", 
-    credentials: true 
-  }));
+const allowedOrigins = [
+  "http://localhost:5173", 
+   "https://financial-tracker-frontend-six.vercel.app", 
+];
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,  
+  })
+);
 
 app.use(express.json());
 app.get("/users/me", verifyToken, getMe);
