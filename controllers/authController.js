@@ -33,12 +33,19 @@ export const login = async (req, res) => {
     }
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: "1h" });
  
-    res.cookie("token", token, {
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === "production",   
-        sameSite: "None",   
-        maxAge: 3600000, 
-    });
+    const isLocalhost = process.env.NODE_ENV === "development";  
+const isRender = process.env.RENDER === "true";  
+const isVercel = process.env.VERCEL === "1";  
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: isVercel || isRender,  
+    sameSite: isVercel || isRender ? "None" : "Lax",
+    maxAge: 3600000,
+};
+
+res.cookie("token", token, cookieOptions);
+
     
 
     res.json({ message: "Login successful" });
