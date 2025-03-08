@@ -6,7 +6,7 @@ export const getGoalBasedTotals = async (req, res) => {
         
         const { data: goal, error: goalError } = await supabase
             .from("profit_goal")
-            .select("*")
+            .select("target_date, creation_date")
             .eq("id", goalId)
             .single();
 
@@ -14,30 +14,34 @@ export const getGoalBasedTotals = async (req, res) => {
             return res.status(404).json({ msg: "Goal not found." });
         }
 
-        const { target_date } = goal;
+        const { target_date, creation_date } = goal;
  
         const { data: fixedIncomes } = await supabase
             .from("income")
             .select("*")
             .eq("is_deleted", false)
+            .gte("date_time", creation_date) 
             .lte("date_time", target_date);
 
         const { data: recurringIncomes } = await supabase
             .from("recurring_income")
             .select("*")
             .eq("is_deleted", false)
+            .gte("start_date", creation_date)
             .lte("end_date", target_date);
 
         const { data: fixedExpenses } = await supabase
             .from("expense")
             .select("*")
             .eq("is_deleted", false)
+            .gte("date_time", creation_date)
             .lte("date_time", target_date);
 
         const { data: recurringExpenses } = await supabase
             .from("recurring_expense")
             .select("*")
             .eq("is_deleted", false)
+            .gte("start_date", creation_date)
             .lte("end_date", target_date);
  
         const totalFixedIncome = fixedIncomes.reduce((sum, item) => sum + item.amount, 0);
