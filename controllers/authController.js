@@ -51,10 +51,26 @@ res.cookie("token", token, cookieOptions);
     res.json({ message: "Login successful" });
 };
  
+//export const logout = (req, res) => {
+  //  res.clearCookie("token");
+  //  res.json({ message: "Logged out successfully" });
+//};
+
 export const logout = (req, res) => {
-    res.clearCookie("token");
+    const isLocalhost = process.env.NODE_ENV === "development";  
+    const isRender = process.env.RENDER === "true";  
+    const isVercel = process.env.VERCEL === "1";  
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure: isVercel || isRender,  
+        sameSite: isVercel || isRender ? "None" : "Lax",
+    };
+
+    res.clearCookie("token", cookieOptions);
     res.json({ message: "Logged out successfully" });
 };
+
  
 export const getMe = async (req, res) => {
   try {
